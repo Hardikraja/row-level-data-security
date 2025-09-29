@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: hardik
+      sqlFile:
+        path: db/changelog/changeset/init-ddls.sql
+        relativeToChangelogFile: false
+        endDelimiter: ";"
+  - changeSet:
+      id: 2
+      author: hardik
+      sqlFile:
+        path: db/changelog/changeset/insert-sample-data.sql
+        relativeToChangelogFile: false
+        endDelimiter: ";"
+
