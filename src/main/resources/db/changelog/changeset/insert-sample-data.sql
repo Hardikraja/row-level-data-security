@@ -32,7 +32,9 @@ VALUES
   (3, 'bob', 'bob@companya.com', 'password123', 1, now()),
   (4, 'charlie', 'charlie@companyb.com', 'password123', 2, now()),
   (5, 'diana', 'diana@companyb.com', 'password123', 2, now()),
-  (6, 'joe', 'joe@attendee.com', 'password123', 1, now())
+  (6, 'joe', 'joe@attendee.com', 'password123', NULL, now()),
+  (7, 'joyce', 'joyce@vendor.com', 'password123', 1, now()),
+  (8, 'john', 'john@attendee.com', 'password123', NULL, now())
 ON CONFLICT (id) DO NOTHING;
 
 -- User Roles
@@ -43,18 +45,20 @@ VALUES
   (3, 3), -- bob -> STAFF
   (4, 2), -- charlie -> EVENT_MANAGER
   (5, 3),  -- diana -> STAFF
-  (6, 4)  -- joe -> ATTENDEE
+  (6, 4),  -- joe -> ATTENDEE
+  (7, 5),  -- joyce -> VENDOR
+  (8, 4)  -- john -> ATTENDEE
 ON CONFLICT (user_id, role_id) DO NOTHING;
 
 -- Tickets
 INSERT INTO ticket (id, attendee_id, event_id, seat_number, created_at)
 VALUES
-  (1, 2, 1, 'A1', now()),  -- bob -> Tech Conference
-  (2, 4, 3, 'B1', now())   -- diana -> Healthcare Summit
+  (1, 6, 1, 'A1', now()),  -- bob -> Tech Conference
+  (2, 8, 3, 'B1', now())   -- diana -> Healthcare Summit
 ON CONFLICT (id) DO NOTHING;
 
 -- Vendor Booths
 INSERT INTO vendor_booth (id, booth_name, vendor_id, event_id, location, created_at)
 VALUES
-  (1, 'Booth 1', 1, 1, 'Hall A', now()) -- alice -> Tech Conference
+  (1, 'Booth 1', 7, 1, 'Hall A', now()) -- alice -> Tech Conference
 ON CONFLICT (id) DO NOTHING;

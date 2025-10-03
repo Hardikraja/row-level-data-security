@@ -52,14 +52,48 @@ class EventServiceTest {
 
     /**
      * Logged In As :- Attendee
-     * As per Attendee role: Return all data belonging to the associated tenant.
+     * As per Attendee role: Return only those events for which attendee has ticket
      */
     @Test
     void testEventServiceRecordsForAttendee(){
-        currentLoggedInUsersContext.setContext(6L,AppRoles.ATTENDEE.getRoleId());
+        currentLoggedInUsersContext.setContext(6L ,AppRoles.ATTENDEE.getRoleId());
         EventFilter eventFilter = new EventFilter();
         List<Event> events = this.eventService.searchEvents(eventFilter);
-        Assertions.assertEquals(2,events.size());
+        Assertions.assertEquals(1,events.size());
+        Event event = events.get(0);
+        Assertions.assertEquals("Tech Conference 2025",event.getName());
+    }
+
+    /**
+     * Logged In As :- Attendee
+     * Tenant_id :- 1
+     * For the Attendee role: Only events for which the attendee has a ticket should be returned.
+     * This test checks filtering for an event where the attendee does not have a ticket.
+     */
+    @Test
+    void testEventServiceRecordsForAttendeeFromOtherTenant(){
+        currentLoggedInUsersContext.setContext(8L,AppRoles.ATTENDEE.getRoleId());
+        EventFilter eventFilter = new EventFilter();
+        eventFilter.setName("Startup Meetup");
+        List<Event> events = this.eventService.searchEvents(eventFilter);
+        Assertions.assertEquals(0,events.size());
+    }
+
+    /**
+     * Context: Logged in as an Attendee
+     * Tenant ID: 1
+     * For the Attendee role: Only events for which the attendee has a ticket should be returned.
+     * This test checks filtering for an event where the attendee have a ticket.
+     */
+    @Test
+    void testEventServiceRecordsForAttendeeFromSameTenant(){
+        currentLoggedInUsersContext.setContext(8L,AppRoles.ATTENDEE.getRoleId());
+        EventFilter eventFilter = new EventFilter();
+        eventFilter.setName("Healthcare Summit");
+        List<Event> events = this.eventService.searchEvents(eventFilter);
+        Assertions.assertEquals(1,events.size());
+        Event event = events.get(0);
+        Assertions.assertEquals("Healthcare Summit",event.getName());
     }
 
     /**
@@ -73,13 +107,13 @@ class EventServiceTest {
         EventFilter eventFilter = new EventFilter();
         Pageable pageable = PageRequest.of(0, 1);
         Page<Event> events = this.eventService.searchPaginatedEvents(eventFilter, pageable);
-        System.out.println(events);
+        Assertions.assertEquals(4, events.getTotalElements());
     }
 
 
     /**
      * Logged In As :- Attendee
-     * As per Attendee role: Return all data belonging to the associated tenant.
+     * As per Attendee role: Return all events data for which attendee has ticket
      */
     @Test
     void testEventServiceRecordsForAttendeePaginated(){
@@ -87,7 +121,46 @@ class EventServiceTest {
         EventFilter eventFilter = new EventFilter();
         Pageable pageable = PageRequest.of(0, 1);
         Page<Event> events = this.eventService.searchPaginatedEvents(eventFilter, pageable);
-        System.out.println(events);
+        Assertions.assertEquals(1, events.getTotalElements());
     }
+
+    /**
+     * Logged In As :- Vendor
+     * For the Vendor role: return all events associated with the vendor’s assigned booth.
+     */
+    @Test
+    void testEventServiceRecordsForVendorRole(){
+        currentLoggedInUsersContext.setContext(7L,AppRoles.VENDOR.getRoleId());
+        EventFilter eventFilter = new EventFilter();
+        List<Event> events = this.eventService.searchEvents(eventFilter);
+        Assertions.assertEquals(1,events.size());
+    }
+
+    /**
+     * Logged In As :- Event Manager
+     * For the Vendor role: return all events associated with the event manager's tenant
+     */
+    @Test
+    void testEventServiceRecordsForEventManagerRole(){
+        currentLoggedInUsersContext.setContext(2L, AppRoles.EVENT_MANAGER.getRoleId());
+        EventFilter eventFilter = new EventFilter();
+        List<Event> events = this.eventService.searchEvents(eventFilter);
+        Assertions.assertEquals(2,events.size());
+    }
+
+    /**
+     * Paginated Search
+     * Logged In As :- Event Manager
+     * For the Vendor role: return all events associated with the event manager's tenant
+     */
+    @Test
+    void testEventServiceRecordsForEventManagerRolePaginated(){
+        currentLoggedInUsersContext.setContext(2L, AppRoles.EVENT_MANAGER.getRoleId());
+        EventFilter eventFilter = new EventFilter();
+        Pageable pageable = PageRequest.of(0, 1);
+        Page<Event> events = this.eventService.searchPaginatedEvents(eventFilter, pageable);
+        Assertions.assertEquals(2, events.getTotalElements());
+    }
+
 
 }
